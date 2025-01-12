@@ -1,0 +1,67 @@
+/**
+ * Cipherguard ~ Open source password manager for teams
+ * Copyright (c) 2020 Cipherguard SA (https://www.cipherguard.com)
+ *
+ * Licensed under GNU Affero General Public License version 3 of the or any later version.
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) 2020 Cipherguard SA (https://www.cipherguard.com)
+ * @license       https://opensource.org/licenses/AGPL-3.0 AGPL License
+ * @link          https://www.khulnasoft.com KhulnaSoft(tm)
+ * @since         2.11.0
+ */
+
+import {defaultAdministratorRbacContext, denyRbacContext} from "../../../../shared/context/Rbac/RbacContext.test.data";
+import {defaultUserAppContext} from "../../../contexts/ExtAppContext.test.data";
+import {defaultResourceWorkspaceContext} from "../../../contexts/ResourceWorkspaceContext.test.data";
+import {resourceWithTotpDto} from "../../../../shared/models/entity/resource/resourceEntity.test.data";
+import {defaultUserDto} from "../../../../shared/models/entity/user/userEntity.test.data";
+import {defaultPasswordExpirySettingsContext} from "../../../contexts/PasswordExpirySettingsContext.test.data";
+import ResourceTypesCollection from "../../../../shared/models/entity/resourceType/resourceTypesCollection";
+import {
+  resourceTypesCollectionDto
+} from "../../../../shared/models/entity/resourceType/resourceTypesCollection.test.data";
+
+/**
+ * Default component props with folder having owner permission
+ * @param {object} data Override the default props.
+ * @returns {object}
+ */
+export function defaultProps(data = {}) {
+  const resourceOwner = defaultUserDto();
+
+  const passwordExpiryContext = defaultPasswordExpirySettingsContext(data?.passwordExpiryContext);
+
+  delete data?.passwordExpiryContext;
+
+  return {
+    context: defaultUserAppContext({
+      users: [resourceOwner]
+    }),
+    rbacContext: defaultAdministratorRbacContext(),
+    passwordExpiryContext: passwordExpiryContext,
+    resourceWorkspaceContext: defaultResourceWorkspaceContext({
+      details: {
+        resource: resourceWithTotpDto({
+          created_by: resourceOwner.id,
+          modified_by: resourceOwner.id,
+        }),
+      }
+    }),
+    resourceTypes: new ResourceTypesCollection(resourceTypesCollectionDto()),
+    ...data
+  };
+}
+
+/**
+ * Props with denied UI action.
+ * @param {object} data Override the default props.
+ * @returns {object}
+ */
+export function propsWithDenyUiAction(data = {}) {
+  return defaultProps({
+    rbacContext: denyRbacContext(),
+    ...data
+  });
+}
